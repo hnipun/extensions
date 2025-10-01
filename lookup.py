@@ -3,6 +3,7 @@ from typing import List, Tuple, Dict
 from common.api import ExtensionAPI
 from common.api import File
 from common.utils import add_line_numbers, parse_json
+from common.file_type import get_file_type
 from common.llm import call_llm
 
 
@@ -41,7 +42,7 @@ def get_prompt(
         related_files: List[File],
         all_files: List[File],
 ) -> str:
-    related_files = [f'```python:{f.path}\n{add_line_numbers(f.get_content())}\n```' for f in related_files]
+    related_files = [f'```{get_file_type(f.path)}:{f.path}\n{add_line_numbers(f.get_content())}\n```' for f in related_files]
     all_files = [f'* {f.path}' for f in all_files]
     prompt = f"""
 Cursor position: row {row}, column {column}
@@ -49,7 +50,7 @@ Symbol at cursor: {symbol}
 
 Current file contents:
 
-```python:{current_file.path}
+```{get_file_type(current_file.path)}:{current_file.path}
 {add_line_numbers(current_file.get_content())}
 ```
 """.strip()

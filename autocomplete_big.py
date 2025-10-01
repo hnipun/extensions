@@ -1,6 +1,7 @@
 from common.api import ExtensionAPI
 from common.llm import call_llm
 from common.utils import extract_code_block
+from common.file_type import get_file_type
 from common.formatting import markdown_section, markdown_code_block
 
 SYSTEM_PROMPT = """
@@ -23,6 +24,7 @@ Your task:
 def make_prompt(api: ExtensionAPI, prefix, suffix, next_line):
     context = []
 
+    current_file_type = get_file_type(api.current_file.path)
     other_files = api.opened_files
     if other_files:
         api.push_meta(f'Relevant files: {", ".join(f.path for f in other_files)}')
@@ -33,7 +35,7 @@ def make_prompt(api: ExtensionAPI, prefix, suffix, next_line):
 
     prompt = '\n\n'.join(context)
 
-    prompt += '\n\n# Current File\n\n```python\n' + prefix + '\n#INSERT_YOUR_CODE'
+    prompt += '\n\n# Current File\n\n```' + current_file_type + '\n' + prefix + '\n#INSERT_YOUR_CODE'
 
     if suffix.strip():
         prompt += '\n' + suffix

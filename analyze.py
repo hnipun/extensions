@@ -1,6 +1,7 @@
 from common.api import ExtensionAPI
 from common.llm import call_llm
 from common.utils import add_line_numbers, parse_json
+from common.file_type import get_file_type
 
 
 def get_system_prompt() -> str:
@@ -17,11 +18,11 @@ You are an expert code analyst specializing in static code analysis. Your goal i
 """.strip()
 
 
-def get_prompt(code: str) -> str:
+def get_prompt(code: str, file_type: str) -> str:
     return f"""
-# Python code (with line numbers)
+# {file_type.title()} code (with line numbers)
 
-```python
+```{file_type}
 {add_line_numbers(code)}
 ```
 """.strip()
@@ -29,8 +30,9 @@ def get_prompt(code: str) -> str:
 
 def extension(api: ExtensionAPI):
     current_file_content = api.current_file.get_content()
+    current_file_type = get_file_type(api.current_file.path)
 
-    prompt = get_prompt(current_file_content)
+    prompt = get_prompt(current_file_content, current_file_type)
 
     messages = [
         {"role": "system", "content": get_system_prompt()},
